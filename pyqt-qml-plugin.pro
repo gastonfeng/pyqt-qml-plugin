@@ -10,7 +10,7 @@ OBJECTS_DIR = build/obj
 UI_DIR = build/uic
 
 # Paths
-INCLUDEPATH += .
+INCLUDEPATH += c:\python36\include
 DEPENDPATH += .
 
 # Sources
@@ -28,8 +28,9 @@ qmldir.path = $$[QT_INSTALL_QML]/com/pelagicore/PyQtQmlBridge
 
 INSTALLS += target qmldir
 
-LIBS += -Wl,-E -rdynamic
+LIBS += -Lc:\python36\libs
 
 # Python specifics
 CONFIG += link_pkgconfig
-PKGCONFIG += python
+#PKGCONFIG += python
+CONFIG += no_keywords
