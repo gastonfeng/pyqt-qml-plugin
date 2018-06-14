@@ -60,18 +60,33 @@ void PyQtQmlPlugin::registerTypes(const char *uri)
     // Dummy type, otherwise the initializeEngine method is not called
     qmlRegisterUncreatableType<QObject>("com.pelagicore.PyQtQmlBridge", 1, 0, "PelagicoreDummyType", "Dummy type, do not use.");
 }
-
+struct module_state {
+    PyObject *error;
+};
+static struct PyModuleDef moduledef = {
+        PyModuleDef_HEAD_INIT,
+        "PyQtQmlBridge",
+        NULL,
+        sizeof(struct module_state),
+        py_methods,
+        NULL,
+        NULL,
+        NULL,
+        NULL
+};
 void PyQtQmlPlugin::initializeEngine(QQmlEngine *engine, const char *)
 {
     context = engine->rootContext();
-    
-    Py_SetProgramName(QCoreApplication::applicationFilePath().toLocal8Bit().data());
+    const size_t cSize = strlen(QCoreApplication::applicationFilePath().toLocal8Bit().data())+1;
+    std::wstring wc( cSize, L'#' );
+    mbstowcs( &wc[0], QCoreApplication::applicationFilePath().toLocal8Bit().data(), cSize );
+    Py_SetProgramName(&wc[0]);
     Py_Initialize();
     PyEval_InitThreads();
-    (void)Py_InitModule("PyQtQmlBridge", py_methods);    
+    (void)PyModule_Create(&moduledef);
     
     // Load module
-    PyObject *pyName = PyString_FromString(MODULE_NAME);
+    PyObject *pyName = PyUnicode_FromString(MODULE_NAME);
     PyObject *pyModule = PyImport_ImportModule(MODULE_NAME);
     Py_XDECREF(pyName);
     
